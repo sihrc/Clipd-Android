@@ -4,7 +4,9 @@ import android.app.Service;
 import android.content.Intent;
 import android.graphics.PixelFormat;
 import android.os.IBinder;
+import android.util.Log;
 import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.WindowManager;
 import android.widget.ImageView;
 
@@ -12,9 +14,13 @@ import android.widget.ImageView;
  * Created by sihrc on 7/29/14.
  */
 public class ClipService extends Service {
+	/**
+	 * TAG *
+	 */
+	final private static String DEBUG_TAG = ClipService.class.getSimpleName();
 
-	private WindowManager windowManager;
-	private ImageView chatHead;
+	/** View **/
+	ClipLayout view;
 
 	@Override
 	public IBinder onBind(Intent intent) {
@@ -26,10 +32,11 @@ public class ClipService extends Service {
 	public void onCreate() {
 		super.onCreate();
 
-		windowManager = (WindowManager) getSystemService(WINDOW_SERVICE);
+		WindowManager windowManager = (WindowManager) getSystemService(WINDOW_SERVICE);
 
-		chatHead = new ImageView(this);
-		chatHead.setImageResource(R.drawable.ic_launcher);
+		view = (ClipLayout) LayoutInflater.from(getApplicationContext()).inflate(R.layout.cliphead, null, false);
+
+		((ImageView) view.findViewById(R.id.icon)).setImageResource(R.drawable.ic_launcher);
 
 		WindowManager.LayoutParams params = new WindowManager.LayoutParams(
 				WindowManager.LayoutParams.WRAP_CONTENT,
@@ -42,12 +49,21 @@ public class ClipService extends Service {
 		params.x = 0;
 		params.y = 100;
 
-		windowManager.addView(chatHead, params);
+		/** Setting Window Context **/
+		view.setWindowManager(windowManager);
+		view.setWindowParams(params);
+
+		/** Add initial view **/
+		windowManager.addView(view, params);
 	}
 
 	@Override
 	public void onDestroy() {
 		super.onDestroy();
-		if (chatHead != null) windowManager.removeView(chatHead);
+		view.destroy();
+	}
+
+	private void d(String message) {
+		Log.d(DEBUG_TAG, message);
 	}
 }
